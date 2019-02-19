@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>643</width>
-    <height>447</height>
+    <width>584</width>
+    <height>367</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,35 +24,36 @@
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>30</y>
+      <y>10</y>
       <width>491</width>
-      <height>281</height>
+      <height>291</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_main">
      <item>
+      <widget class="QLabel" name="label_device_port">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <italic>true</italic>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Device Status :</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <layout class="QFormLayout" name="formLayout_settings">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_8">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Connected Port</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
+       <item row="6" column="0">
         <widget class="QLabel" name="label_6">
          <property name="text">
-          <string>Serial Port</string>
+          <string>Serial Port on Device</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="6" column="1">
         <widget class="QComboBox" name="comboBox_6">
          <item>
           <property name="text">
@@ -96,14 +97,14 @@
          </item>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="7" column="0">
         <widget class="QLabel" name="label_2">
          <property name="text">
           <string>Stop bits</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="7" column="1">
         <widget class="QComboBox" name="comboBox_2">
          <item>
           <property name="text">
@@ -117,14 +118,14 @@
          </item>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="9" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
           <string>Parity</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="1">
+       <item row="9" column="1">
         <widget class="QComboBox" name="comboBox">
          <item>
           <property name="text">
@@ -143,14 +144,14 @@
          </item>
         </widget>
        </item>
-       <item row="6" column="0">
+       <item row="10" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
           <string>Data bits</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="1">
+       <item row="10" column="1">
         <widget class="QComboBox" name="comboBox_4">
          <item>
           <property name="text">
@@ -169,14 +170,14 @@
          </item>
         </widget>
        </item>
-       <item row="7" column="0">
+       <item row="11" column="0">
         <widget class="QLabel" name="label_7">
          <property name="text">
           <string>Baud Rate</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
+       <item row="11" column="1">
         <widget class="QComboBox" name="comboBox_7">
          <item>
           <property name="text">
@@ -188,20 +189,6 @@
            <string>115200</string>
           </property>
          </item>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="label_device_port">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <italic>true</italic>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
         </widget>
        </item>
       </layout>
@@ -232,7 +219,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>643</width>
+     <width>584</width>
      <height>25</height>
     </rect>
    </property>
@@ -292,7 +279,7 @@
   </action>
   <action name="actionReload_USB_Interface_List">
    <property name="text">
-    <string>Reload USB Interface List</string>
+    <string>Rescan for Device</string>
    </property>
   </action>
   <action name="actionAbout_2">

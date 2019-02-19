@@ -170,10 +170,10 @@ void MainWindow::refresh_usb(){
     identify_connected_port_of_arduino();
     if(arduino_is_available){
 
-        ui->label_device_port->setText(": [Available] "+arduino_port_name);
+        ui->label_device_port->setText("Device Status : [Available] "+arduino_port_name);
     }
     else{
-        ui->label_device_port->setText(": [Not Available]");
+        ui->label_device_port->setText("Device Status : [Not Available]");
     }
 }
 
