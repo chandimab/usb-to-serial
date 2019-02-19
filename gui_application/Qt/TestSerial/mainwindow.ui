@@ -246,6 +246,7 @@
      <string>Device</string>
     </property>
     <addaction name="actionReload_USB_Interface_List"/>
+    <addaction name="actionDisconnect"/>
    </widget>
    <addaction name="menuMain"/>
    <addaction name="menuDevice"/>
@@ -285,6 +286,11 @@
   <action name="actionAbout_2">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionDisconnect">
+   <property name="text">
+    <string>Disconnect</string>
    </property>
   </action>
  </widget>

@@ -21,40 +21,28 @@ class MainWindow : public QMainWindow{
         ~MainWindow();
 
     private slots: //functions
-        /*
-         * refresh usb
-         */
-
-        void refresh_usb();
-
-        /*
-         *  identify and get information about the connected port of arduino (in pc)
-         */
-        void identify_connected_port_of_arduino();
-
-        /*
-         *  Open and configure the arduino port if available
-         */
-        void open_and_configure_port(
-                bool arduino_is_available,
-                QString arduino_port_name
-        );
-
-        void open_and_configure_port_test();
-
         /** build conf string from Ui inputs **/
-        QString buid_conf_string();
+ //       QString buid_conf_string();
 
-        void readSerial();
-        void readSerial_test();
-        void send_msg();
 
-        /** cleaned arduino **/
-        bool arduino_configure_port();
-        void arduino_slot_serial_read();
-        void arduino_serial_write(char *data);
-        bool arduino_close();
 
+        /** PROJECT**/
+        // main functions
+        void device_identify();
+        void device_open_and_configure();
+        void device_read_config(); //returns config for all 8 serial ports
+        void device_write_config(int serial_port_id); //write config for only the given port
+        void device_close_connection();
+        //helper functions
+        void device_on_serial_read(); // slot to be executed on serial read
+        void device_write_data(char *data);
+        int get_config_number();
+
+        //GUI slots
+        void device_rescan(); // identify and connect
+        void display_config();
+        void set_config();
+        void default_config();
 
     private:
         Ui::MainWindow *ui;

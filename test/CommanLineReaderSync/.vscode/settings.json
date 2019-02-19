@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "qstringlist": "cpp",
+        "qtextstream": "cpp"
+    }
+}
