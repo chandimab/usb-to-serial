@@ -1,6 +1,6 @@
 #include <avr/io.h>
 #include <util/delay.h>
-#include <CustomSoftwareSerial.h>
+#include "CustomSoftwareSerial.h"
 
 /** definitions for USART calculations **/
 #define USART_BAUDRATE 9600 
@@ -187,7 +187,6 @@ int main(void){
 
    /** initializing software serial **/
    init_soft_serial();
-
 
 
   /** put the device into working mode **/
