@@ -1,12 +1,13 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "CustomSoftwareSerial.h"
+#include <EEPROM.h>
 
-/** definitions for USART calculations **/
+/** --------------------------------------------------------------- definitions for USART calculations--------------------------- **/
 #define USART_BAUDRATE 9600 
 #define BAUD_PRESCALE (((F_CPU / (USART_BAUDRATE * 16UL))) - 1) 
 
-/** helper function definitions as preprocessor directives **/
+/**--------------------------------------------------------------- helper function definitions as preprocessor directives --------- **/
 #define bit_get(p,m) ((p) & (m)) 
 #define bit_set(p,m) ((p) |= (m)) 
 #define bit_clr(p,m) ((p) &= ~(m)) 
@@ -21,7 +22,7 @@
 /** SoftwareSerial pointer array **/
 CustomSoftwareSerial* s[8];
 
-/** Pin Assignments & Mappings **/
+/** -----------------------------------------------------------------------------Pin Assignments & Mappings ---------------------**/
 int TX[8] = //IC_B
   {
     2, //TX0 = D2
@@ -46,9 +47,31 @@ int RX[8] = //IC_A
     17 //RX7 = A3
   };
 
+/**  ----------------------------------------------------------------------Buffer ic initializations ----------- **/
+
+void init_buffer_ics(){
+  /** Both ICs were in Output Enable mode by default (hard wired)**/
+
+  /** configuring signal direction**/
+  digitalWrite(IC_A_DIR, 0); //RX IC
+  digitalWrite(IC_B_DIR, 1); //TX IC
+}
 
 
+/**  ----------------------------------------------------------------------EEPROM implementations------------- **/
 
+//write serial settings to eeprom
+void eeprom_write(unsigned char serial_port, unsigned char setting){
+  EEPROM.write(serial_port, setting); //byte
+}
+
+//read serial setting from eeprom
+unsigned char eeprom_read(unsigned char serial_port){
+  return (unsigned char) EEPROM.read(serial_port);
+}
+
+
+/**  ----------------------------------------------------------------------Software serial implementations------------ **/
 void init_soft_serial(){
   for(int i=0; i<8; i++){
     s[i] = new CustomSoftwareSerial(RX[i], TX[i]); // rx, tx
@@ -64,6 +87,8 @@ void write_s_serial(unsigned char sn, unsigned char data){
 unsigned char read_s_serial(unsigned char sn){
   return s[sn]->read();
 }
+
+/** ------------------------------------------------------------------------USART communication implementations-------------- **/
 
 void init_usart(){
    UCSR0B |= (1 << RXEN0) | (1 << TXEN0);   // Turn on the transmission and reception circuitry 
@@ -83,77 +108,63 @@ void write_usart(unsigned char data){
   UDR0 = data; // Echo back the received byte back to the computer
 }
 
+/** -----------------------------------------------------------------------------------controller program--------------- **/
+
 #define M_CONF_WRITE    0b00000001
 #define M_CONF_READ     0b00000010
 #define M_DATA_READ     0b00000100
 #define M_DATA_WRITE    0b00001000
 
 void change_state(){
-  unsigned char cmd = read_usart();
+  unsigned char cmd = read_usart(); //contains both the serial port & mode information
 
-  unsigned char serial = (cmd >> 5); // serial port
+  unsigned char serial = (cmd >> 5); // serial port, specifies which serial port.
   unsigned char mode = (cmd & 0b00011111); // mode
 
     
-  if(mode == M_CONF_WRITE){ // config
+  if(mode == M_CONF_WRITE){ // configuration write mode
     
-    unsigned char data = read_usart(); //read data
+    unsigned char data = read_usart(); //read configurations to be written
     
     //change serial port setting, save and setting in the eeprom
-    //write_usart(data);
-    write_usart('1');
-
     
-  }else if(mode == M_DATA_WRITE){ //write
+    eeprom_write(serial, data); //write to memory
+
+    write_usart('1'); //ACK
+ 
+    
+  }else if(mode == M_DATA_WRITE){ // data write mode
 
     unsigned char data = read_usart(); //read data
     
     // write data to serial using software serial
     write_s_serial(serial, data);
-  
 
-    write_usart('4');
+    write_usart('4'); //ACK
 
     
-  }else if(mode == M_DATA_READ){ //read
+  }else if(mode == M_DATA_READ){ //data read mode
     // read data from serial using software serial
     unsigned char resp = read_s_serial(serial);
     // now send that
-    //write_usart(resp); //data
-    write_usart('3');
+    write_usart(resp); //data
+    //write_usart('3');
     
-  }else if(mode == M_CONF_READ){ //read - config
+  }else if(mode == M_CONF_READ){ //configuration read mode
     // read running config from relevant to the serial
-    write_usart('2');
+    unsigned char conf = eeprom_read(serial);
+    write_usart(conf);
+    //write_usart('2');
     
   }else{
     //echo
-    write_usart(cmd);
+    //write_usart(cmd);
     
   }
 
-
 }
 
-
-void change_state2(){
-  unsigned char cmd = read_usart();
-
-  
-  unsigned char serial = (cmd >> 5); // serial port
-  unsigned char mode = (cmd & 0b00011111); // mode
-
-  unsigned char data = read_usart(); //read data
-    
-
-  write_usart(cmd);
-  write_usart(serial);
-
-  write_usart(data);
-  
-
-}
-
+/** echo program for testing purpose **/
 void echo(){
   unsigned char ReceivedByte;
   ReceivedByte = read_usart(); // Fetch the received byte value into the variable "ByteReceived" 
@@ -164,15 +175,8 @@ int send_stable(){
   write_usart('K');write_usart('_');write_usart('@');write_usart('Q'); return 0;
 }
 
-void init_buffer_ics(){
-  /** Both ICs were in Output Enable mode by default (hard wired)**/
 
-  /** configuring signal direction**/
-  digitalWrite(IC_A_DIR, 0); //RX IC
-  digitalWrite(IC_B_DIR, 1); //TX IC
-}
-
-
+/** ---------------------------------------------------------------------------------------------MAIN()--------------- **/
 
 int main(void){
    
