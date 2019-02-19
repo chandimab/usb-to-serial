@@ -9,6 +9,13 @@
 #include <QPushButton>
 
 
+//communication
+#define M_CONF_WRITE    0b00000001
+#define M_CONF_READ     0b00000010
+#define M_DATA_READ     0b00000100
+#define M_DATA_WRITE    0b00001000
+
+
 namespace Ui {
     class MainWindow;
 }
@@ -35,8 +42,12 @@ class MainWindow : public QMainWindow{
         void device_close_connection();
         //helper functions
         void device_on_serial_read(); // slot to be executed on serial read
-        void device_write_data(char *data);
-        int get_config_number();
+        void device_write_data(QString data);
+        void device_write_data_byte(char data);
+        char get_config_number();
+        char device_read_serial_byte();
+
+        void device_is_ready_for_transmission();
 
         //GUI slots
         void device_rescan(); // identify and connect
@@ -63,6 +74,8 @@ class MainWindow : public QMainWindow{
 
 
         bool arduino_is_available;
+
+        QByteArray send_data;
 
         /** GUI related **/
 //        QPushButton

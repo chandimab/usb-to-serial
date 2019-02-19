@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>584</width>
-    <height>367</height>
+    <width>597</width>
+    <height>341</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,37 +24,64 @@
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>10</y>
+      <y>30</y>
       <width>491</width>
-      <height>291</height>
+      <height>271</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_main">
      <item>
-      <widget class="QLabel" name="label_device_port">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <italic>true</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Device Status :</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <layout class="QFormLayout" name="formLayout_settings">
-       <item row="6" column="0">
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_device">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Device Status </string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLabel" name="label_device_status">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <italic>true</italic>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Device PORT</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
         <widget class="QLabel" name="label_6">
          <property name="text">
           <string>Serial Port on Device</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="1">
-        <widget class="QComboBox" name="comboBox_6">
+       <item row="3" column="1">
+        <widget class="QComboBox" name="comboBox_serial_port">
          <item>
           <property name="text">
            <string>Serial 0</string>
@@ -97,36 +124,48 @@
          </item>
         </widget>
        </item>
-       <item row="7" column="0">
-        <widget class="QLabel" name="label_2">
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_7">
          <property name="text">
-          <string>Stop bits</string>
+          <string>Baud Rate</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
-        <widget class="QComboBox" name="comboBox_2">
+       <item row="4" column="1">
+        <widget class="QComboBox" name="comboBox_baud_rate">
          <item>
           <property name="text">
-           <string>0</string>
+           <string>9600</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>1</string>
+           <string>115200</string>
           </property>
          </item>
         </widget>
        </item>
-       <item row="9" column="0">
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Data bits</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
           <string>Parity</string>
          </property>
         </widget>
        </item>
-       <item row="9" column="1">
-        <widget class="QComboBox" name="comboBox">
+       <item row="6" column="1">
+        <widget class="QComboBox" name="comboBox_parity">
+         <item>
+          <property name="text">
+           <string>None Parity</string>
+          </property>
+         </item>
          <item>
           <property name="text">
            <string>Even Parity</string>
@@ -137,22 +176,44 @@
            <string>Odd Parity</string>
           </property>
          </item>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Stop bits</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QComboBox" name="comboBox_stop_bits">
          <item>
           <property name="text">
-           <string>No Parity</string>
+           <string>1</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>2</string>
           </property>
          </item>
         </widget>
        </item>
-       <item row="10" column="0">
-        <widget class="QLabel" name="label_4">
+       <item row="2" column="1">
+        <widget class="QLabel" name="label_device_port">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
-          <string>Data bits</string>
+          <string>TextLabel</string>
          </property>
         </widget>
        </item>
-       <item row="10" column="1">
-        <widget class="QComboBox" name="comboBox_4">
+       <item row="5" column="1">
+        <widget class="QComboBox" name="comboBox_databits">
          <item>
           <property name="text">
            <string>5</string>
@@ -170,44 +231,23 @@
          </item>
         </widget>
        </item>
-       <item row="11" column="0">
-        <widget class="QLabel" name="label_7">
-         <property name="text">
-          <string>Baud Rate</string>
-         </property>
-        </widget>
-       </item>
-       <item row="11" column="1">
-        <widget class="QComboBox" name="comboBox_7">
+       <item row="8" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_buttons">
          <item>
-          <property name="text">
-           <string>9600</string>
-          </property>
+          <widget class="QPushButton" name="pushButton_set">
+           <property name="text">
+            <string>Set</string>
+           </property>
+          </widget>
          </item>
          <item>
-          <property name="text">
-           <string>115200</string>
-          </property>
+          <widget class="QPushButton" name="pushButton_default">
+           <property name="text">
+            <string>Default</string>
+           </property>
+          </widget>
          </item>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_buttons">
-       <item>
-        <widget class="QPushButton" name="pushButton_set">
-         <property name="text">
-          <string>Set</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_default">
-         <property name="text">
-          <string>Default</string>
-         </property>
-        </widget>
+        </layout>
        </item>
       </layout>
      </item>
@@ -219,7 +259,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>584</width>
+     <width>597</width>
      <height>25</height>
     </rect>
    </property>

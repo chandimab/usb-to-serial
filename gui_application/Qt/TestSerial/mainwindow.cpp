@@ -31,7 +31,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     device_identify();
 
     if(arduino_is_available){
-        ui->label_device_port->setText("Device Status : [Available] on PORT "+ arduino_port_name);
+        ui->label_device_status->setText(": [Available]");
+        ui->label_device_port->setText(": "+ arduino_port_name);
         // open and configure the device, if available
         device_open_and_configure();
 
@@ -42,7 +43,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         display_config();
 
     }else{
-        ui->label_device_port->setText("Device Status : [Unavailable]");
+        ui->label_device_status->setText(": [Unavailable]");
+        ui->label_device_port->setText(": - ");
     }
 
     /** GUI SIGNALS -> SLOTS **/
@@ -163,14 +165,14 @@ void MainWindow::device_open_and_configure(){
         arduino->setStopBits(QSerialPort::OneStop);
 
         /** when arduino:SIGNAL(readyRead()) ---> SLOT(device_on_serial_read()):this **/
-        QObject::connect(
-                    arduino,
-                    SIGNAL(readyRead()),
-                    this,
-                    SLOT(device_on_serial_read())
-        );
+//        QObject::connect(
+//                    arduino,
+//                    SIGNAL(readyRead()),
+//                    this,
+//                    SLOT(device_on_serial_read())
+//        );
 
-
+        qDebug() << "Configured successfully.\n";
     }else{
         qDebug() << "Couldn't find the correct port for the arduino.\n";
         QMessageBox::information(this, "Serial Port Error", "Couldn't open serial port to arduino.");
@@ -189,44 +191,68 @@ void MainWindow::device_write_config(int serial_port_id){
 
 void MainWindow::device_close_connection(){
     arduino->close();
-    qDebug()<<"[arduino close]\n";
+    qDebug()<<"[arduino close]";
 }
 
 //helper functions
 
 // slot to be executed on serial read
 void MainWindow::device_on_serial_read(){
-    qDebug()<<"[serial read]\n";
 
-    /**
-    qDebug() << "readSerial_test(): start\n";
-    serialData = arduino->readAll();
-    qDebug() << "readSerial_test(): " << serialData <<"\n";
-      **/
+//    qDebug() << "[serial read]: " << QString::fromLatin1(arduino->readLine());
+    //qDebug() << "[serial read]: " << arduino->readAll();
+
+    //qDebug() << "[serial read]: " << arduino->read(1);
+
+
 }
 
-void MainWindow::device_write_data(char *data){
-    arduino->write(data);
+char MainWindow::device_read_serial_byte(){ //should be a blocking???
+    if(arduino->waitForReadyRead(50)){
+        QByteArray r = arduino->read(1);
+        qDebug() << "[serial read:byte]: " << r;
+        return r[0];
+    }else{
+        return -1;
+    }
+}
+
+
+void MainWindow::device_write_data(QString data){
+
+    arduino->write(data.toLatin1());
     arduino->flush(); //considering time critical things
-    qDebug()<<"[serial write] "<<data<<"\n";
+    qDebug()<<"[serial write] "<<data;
 }
+
+void MainWindow::device_write_data_byte(char data){
+    QByteArray bData; bData.resize(1); //1 byte
+    bData[0] =  data;
+
+    arduino->write(bData);
+    arduino->flush(); //considering time critical things
+    qDebug()<<"[serial write] "<<data;
+}
+
 
 //GUI slots
 
 // identify and connect
 void MainWindow::device_rescan(){
-    qDebug() << "RefreshUsb()...\n";
+    qDebug() << "RefreshUsb()...";
 
     //identify
     device_identify();
 
     if(arduino_is_available){
-        ui->label_device_port->setText("Device Status : [Available] on PORT "+ arduino_port_name);
+        ui->label_device_status->setText(": [Available]");
+        ui->label_device_port->setText(": "+ arduino_port_name);
         //open and configure
         device_open_and_configure();
 
     }else{
-        ui->label_device_port->setText("Device Status : [Unavailable]");
+        ui->label_device_status->setText(": [Unavailable]");
+        ui->label_device_port->setText(": - ");
     }
 
 
@@ -236,11 +262,77 @@ void MainWindow::display_config(){
 }
 void MainWindow::set_config(){
 
+
+    //*send_data = M_CONF_WRITE;
+    //device_write_data(&send_data);
+    //send_data = "1";
+    //device_write_data(send_data);
+    unsigned char send[] = {
+        M_CONF_WRITE,
+        0xF1, //data
+
+        M_CONF_READ,
+
+        M_DATA_READ,
+
+        M_DATA_WRITE,
+        0xF1,
+
+        M_DATA_WRITE+1
+    };
+
+        device_write_data_byte(send[0]); //write byte
+        device_write_data_byte(send[1]); //write byte
+        device_read_serial_byte(); //read byte
+
+        device_write_data_byte(send[2]); //write byte
+        device_read_serial_byte(); //read byte
+
+        device_write_data_byte(send[3]); //write byte
+        device_read_serial_byte(); //read byte
+
+        device_write_data_byte(send[4]); //write byte
+        device_write_data_byte(send[5]); //write byte
+        device_read_serial_byte(); //read byte
+
+        //else
+        device_write_data_byte(send[6]); //write byte
+        device_read_serial_byte(); //read byte
+
+
 }
 void MainWindow::default_config(){
 
 }
 
-int MainWindow::get_config_number(){
+char MainWindow::get_config_number(){
+    /**
+    int data_[]={500,600,700,800};
+    int parity_[]={0, 10, 20};
+    int stopbits_[] = {1, 2};
+    // databits[5-8] parity[n-0,odd-1, even 2] stopbits[1-2]
+    return (
+        data_[ui->comboBox_databits->currentIndex()]+
+        parity_[ui->comboBox_parity->currentIndex()]+
+        stopbits_[ui->comboBox_stop_bits->currentIndex()]
+    );
 
+    **/
+
+    //how to send them in one byte
+    //[4:3][2:1][0]
+    char data_[] = {0, (1<<3), (1<<4), (1<<3 | 1<<4)};
+    char parity_[] = {0, (1<<1), (1<<2), (1<<1 | 1<<2)};
+    char stopbits_[] = {1, 2};
+
+    return (
+        data_[ui->comboBox_databits->currentIndex()] |
+        parity_[ui->comboBox_parity->currentIndex()] |
+        stopbits_[ui->comboBox_stop_bits->currentIndex()]
+    );
+}
+
+//this function will block until the device is ready for transmission.
+void MainWindow::device_is_ready_for_transmission(){
+    //for(int i=0;i<10;i++) device_read_serial_byte();
 }
