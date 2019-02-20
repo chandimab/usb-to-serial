@@ -10,8 +10,6 @@
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 
-
-
 #include <string>
 #include <QDebug>
 #include <QMessageBox>
@@ -21,11 +19,10 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
     ui->setupUi(this);
+    ui->label_device_status->setStyleSheet("QLabel { color : red; }");
 
     // setting initial values
     arduino = new QSerialPort(this);
-    serialBuffer = "";
-    parsed_data = "";
 
     // scan for devices
     device_identify();
@@ -39,8 +36,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         // load/read configurations from the device, and store in a datastructure
         device_read_config();
 
+        device_setup = true;
+
         // display loaded configurations
         display_config();
+
+
 
     }else{
         ui->label_device_status->setText(": [Unavailable]");
@@ -172,12 +173,12 @@ void MainWindow::device_open_and_configure(){
         arduino->setStopBits(QSerialPort::OneStop);
 
         /** when arduino:SIGNAL(readyRead()) ---> SLOT(device_on_serial_read()):this **/
-//        QObject::connect(
-//                    arduino,
-//                    SIGNAL(readyRead()),
-//                    this,
-//                    SLOT(device_on_serial_read())
-//        );
+        QObject::connect(
+                    arduino,
+                    SIGNAL(readyRead()),
+                    this,
+                    SLOT(device_on_serial_read())
+        );
 
         qDebug() << "Configured successfully.\n";
     }else{
@@ -197,8 +198,10 @@ void MainWindow::device_write_config(int serial_port_id){
 }
 
 void MainWindow::device_close_connection(){
-    arduino->close();
-    qDebug()<<"[arduino close]";
+    if(arduino->isOpen()){
+        arduino->close();
+        qDebug()<<"[arduino close]";
+    }
 }
 
 //helper functions
@@ -210,7 +213,21 @@ void MainWindow::device_on_serial_read(){
     //qDebug() << "[serial read]: " << arduino->readAll();
 
     //qDebug() << "[serial read]: " << arduino->read(1);
+    //qDebug() << "[device_on_serial_read] : "; // << arduino->readAll();
 
+    if(lock == false){
+          unsigned char token = device_read_serial_byte() & 0b00011111; //token byte
+          if(token == M_FROM_DEVICE_DATA_SERIAL){
+              //serial input
+              unsigned char serial = (token >>5);
+              unsigned char data = device_read_serial_byte();
+
+              qDebug() << "[device_on_serial_read] : serial "<<(int)(serial)<<" data: "<<data;
+          }
+    }else{
+        //ignore
+
+    }
 
 }
 
@@ -266,7 +283,8 @@ void MainWindow::device_rescan(){
 }
 void MainWindow::display_config(){
 
-    if(arduino_is_available){
+    if(arduino_is_available && device_setup){
+        lock = true;
 
         //get selected serial interface
         unsigned char serial_selected = (unsigned char)(ui->comboBox_serial_port->currentIndex());
@@ -277,18 +295,19 @@ void MainWindow::display_config(){
                     (serial_selected << 5) //specifies to which serial
         );
 
+        //device_read_serial_byte(); //token
         char conf = device_read_serial_byte(); //read byte
 
         if(conf == -1){ //error on reading
-            //qDebug()<<"errorOnReading";
+            qDebug()<<"errorOnReading";
         }else if((conf & 0b11100000) == 0b11100000){ //no saved configs, default
-            //qDebug()<<"defaultConfig";
+            qDebug()<<"defaultConfig";
             default_config(); //show default config, for , current serial.
         }else{
             //configs
             //baud,data, parity,stop
             //[7:5][4:3][2:1][0]
-            //qDebug()<<"fromSavedData";
+            qDebug()<<"fromSavedData";
             ui->comboBox_baud_rate->setCurrentIndex(
                 (conf & 0b11100000) >> 5  //baud rate
             );
@@ -307,6 +326,9 @@ void MainWindow::display_config(){
 
         }
 
+
+        lock = false;
+
     }
 
 }
@@ -317,6 +339,8 @@ void MainWindow::set_config(){
     //qDebug()<<"unsigned coverted "<<serial_selected;
     //serial_selected = serial_selected & 0x0F; //to avoid sign bits
     //qDebug()<<"unsigned masked "<<serial_selected;
+
+    lock = true;
 
     //sending command
     device_write_data_byte(
@@ -333,7 +357,9 @@ void MainWindow::set_config(){
         config_number
     ); //write byte
 
-    device_read_serial_byte(); //read ack
+    device_read_serial_byte(); //ack
+
+    lock = false;
 
 /** test : successful
     unsigned char send[] = {
@@ -412,7 +438,4 @@ unsigned char MainWindow::get_config_number(){
     );
 }
 
-//this function will block until the device is ready for transmission.
-void MainWindow::device_is_ready_for_transmission(){
-    //for(int i=0;i<10;i++) device_read_serial_byte();
-}
+

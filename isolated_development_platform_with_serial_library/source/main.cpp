@@ -1,5 +1,6 @@
-#define Include_Path /mnt/LinuxOpt/qt_test/CommanLineReaderSync/
 
+#include "USB2SerialLib/testlib_usb_to_serial.h"
+#include "USB2SerialLib/testlib_usb_to_serial.cpp"
 
 
 #include <QtCore/QCoreApplication>

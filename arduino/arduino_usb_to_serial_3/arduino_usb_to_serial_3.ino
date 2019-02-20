@@ -154,7 +154,13 @@ void write_usart(unsigned char data){
 #define M_DATA_READ     0b00000100
 #define M_DATA_WRITE    0b00001000
 
-#define M_FROM_DEVICE_SERIAL    0b00010000
+#define M_FROM_DEVICE_CONF_WRITE_ACK    0b00010001
+#define M_FROM_DEVICE_CONF_READ         0b00010010
+#define M_FROM_DEVICE_DATA_READ         0b00010100
+#define M_FROM_DEVICE_DATA_WRITE_ACK    0b00011000
+
+#define M_FROM_DEVICE_DATA_SERIAL       0b00011111
+
 
 void change_state(){
   unsigned char cmd = read_usart(); //contains both the serial port & mode information
@@ -180,29 +186,33 @@ void change_state(){
 
      //applying setting to the serial
 
-    write_usart('1'); //ACK
+    write_usart(M_FROM_DEVICE_CONF_WRITE_ACK | (serial<<5)); //ACK
  
     
   }else if(mode == M_DATA_WRITE){ // data write mode
 
     unsigned char data = read_usart(); //read data
-    
+
     // write data to serial using software serial
     write_s_serial(serial, data);
-
-    write_usart('4'); //ACK
+    
+    write_usart(M_FROM_DEVICE_DATA_WRITE_ACK | (serial<<5)); //ACK
+    
 
     
   }else if(mode == M_DATA_READ){ //data read mode
     // read data from serial using software serial
     unsigned char resp = read_s_serial(serial);
     // now send that
+    //write_usart(M_FROM_DEVICE_DATA_READ | (serial<<5)); //token
     write_usart(resp); //data
     //write_usart('3');
     
   }else if(mode == M_CONF_READ){ //configuration read mode
     // read running config from relevant to the serial
     unsigned char conf = eeprom_read(serial);
+    
+    //write_usart(M_FROM_DEVICE_CONF_READ | (serial<<5)); //token
     write_usart(conf);
     //write_usart('2');
     
@@ -212,8 +222,8 @@ void change_state(){
   //check serial
   for(unsigned char i=0; i<8;i++){
     if(s[i]->available()){
-      unsigned char token = M_FROM_DEVICE_SERIAL | (i<<5);
-      write_usart(token); //token
+      
+      write_usart(M_FROM_DEVICE_DATA_SERIAL | (i<<5)); //token
 
       //todo check this, whether actually gives only byte
       write_usart(s[i]->read()); //data

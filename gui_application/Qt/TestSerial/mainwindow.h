@@ -15,6 +15,13 @@
 #define M_DATA_READ     0b00000100
 #define M_DATA_WRITE    0b00001000
 
+#define M_FROM_DEVICE_CONF_WRITE_ACK    0b00010001
+#define M_FROM_DEVICE_CONF_READ         0b00010010
+#define M_FROM_DEVICE_DATA_READ         0b00010100
+#define M_FROM_DEVICE_DATA_WRITE_ACK    0b00011000
+
+#define M_FROM_DEVICE_DATA_SERIAL       0b00011111
+
 
 namespace Ui {
     class MainWindow;
@@ -69,14 +76,16 @@ class MainWindow : public QMainWindow{
         QByteArray serialData;
 
         QString
-            serialBuffer,
-            parsed_data,
             arduino_port_name;
 
 
-        bool arduino_is_available;
+        bool
+            device_setup = false,
+            arduino_is_available =false,
+            lock = false;
 
-        QByteArray send_data;
+        //QByteArray send_data;
+
 
         /** GUI related **/
 //        QPushButton
