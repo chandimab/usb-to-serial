@@ -1,0 +1,2 @@
+1) Do modifications to /source/main.cpp
+2) Make from /build directory
