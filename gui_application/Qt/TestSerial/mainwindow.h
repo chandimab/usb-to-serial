@@ -44,7 +44,7 @@ class MainWindow : public QMainWindow{
         void device_on_serial_read(); // slot to be executed on serial read
         void device_write_data(QString data);
         void device_write_data_byte(char data);
-        char get_config_number();
+        unsigned char get_config_number();
         char device_read_serial_byte();
 
         void device_is_ready_for_transmission();
@@ -54,6 +54,7 @@ class MainWindow : public QMainWindow{
         void display_config();
         void set_config();
         void default_config();
+
 
     private:
         Ui::MainWindow *ui;

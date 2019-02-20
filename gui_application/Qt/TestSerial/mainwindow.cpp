@@ -81,6 +81,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
                 SLOT(default_config())
     );
 
+    //on combobox_serial change, if device is connected => update settings accordingly.
+    connect(
+                ui->comboBox_serial_port,
+                SIGNAL(currentIndexChanged(int)),
+                this,
+                SLOT(display_config())
+    );
 
 
     /**
@@ -210,7 +217,7 @@ void MainWindow::device_on_serial_read(){
 char MainWindow::device_read_serial_byte(){ //should be a blocking???
     if(arduino->waitForReadyRead(50)){
         QByteArray r = arduino->read(1);
-        qDebug() << "[serial read:byte]: " << r;
+        qDebug() << "[serial read:byte]: " << r[0];
         return r[0];
     }else{
         return -1;
@@ -222,7 +229,7 @@ void MainWindow::device_write_data(QString data){
 
     arduino->write(data.toLatin1());
     arduino->flush(); //considering time critical things
-    qDebug()<<"[serial write] "<<data;
+    qDebug()<<"[serial write] "<<data.toLatin1();
 }
 
 void MainWindow::device_write_data_byte(char data){
@@ -259,17 +266,79 @@ void MainWindow::device_rescan(){
 }
 void MainWindow::display_config(){
 
+    if(arduino_is_available){
+
+        //get selected serial interface
+        unsigned char serial_selected = (unsigned char)(ui->comboBox_serial_port->currentIndex());
+        //serial_selected = serial_selected & 0x0F; //to avoid sign bits
+        //get config information from the device
+        device_write_data_byte(
+                    M_CONF_READ | //command
+                    (serial_selected << 5) //specifies to which serial
+        );
+
+        char conf = device_read_serial_byte(); //read byte
+
+        if(conf == -1){ //error on reading
+            //qDebug()<<"errorOnReading";
+        }else if((conf & 0b11100000) == 0b11100000){ //no saved configs, default
+            //qDebug()<<"defaultConfig";
+            default_config(); //show default config, for , current serial.
+        }else{
+            //configs
+            //baud,data, parity,stop
+            //[7:5][4:3][2:1][0]
+            //qDebug()<<"fromSavedData";
+            ui->comboBox_baud_rate->setCurrentIndex(
+                (conf & 0b11100000) >> 5  //baud rate
+            );
+
+            ui->comboBox_databits->setCurrentIndex(
+                (conf & 0b00011000) >> 3 //data
+            );
+
+            ui->comboBox_parity->setCurrentIndex(
+                (conf & 0b00000110) >> 1 //parity
+            );
+
+            ui->comboBox_stop_bits->setCurrentIndex(
+                (conf & 0b00000001) //stopbit
+            );
+
+        }
+
+    }
+
 }
 void MainWindow::set_config(){
 
+    //get selected serial interface
+    unsigned char serial_selected = (unsigned char)(ui->comboBox_serial_port->currentIndex());
+    //qDebug()<<"unsigned coverted "<<serial_selected;
+    //serial_selected = serial_selected & 0x0F; //to avoid sign bits
+    //qDebug()<<"unsigned masked "<<serial_selected;
 
-    //*send_data = M_CONF_WRITE;
-    //device_write_data(&send_data);
-    //send_data = "1";
-    //device_write_data(send_data);
+    //sending command
+    device_write_data_byte(
+                M_CONF_WRITE | //command
+                (serial_selected << 5) //specifies to which serial
+
+    ); //write byte
+
+    //this is unsigned 8bit. the 8th bit could be 1. if converted to char, it will give different meaning??
+    unsigned config_number = get_config_number(); //geting the generated config data to be written
+
+    //sending config data
+    device_write_data_byte(
+        config_number
+    ); //write byte
+
+    device_read_serial_byte(); //read ack
+
+/** test : successful
     unsigned char send[] = {
         M_CONF_WRITE,
-        0xF1, //data
+        0x01, //data
 
         M_CONF_READ,
 
@@ -283,13 +352,13 @@ void MainWindow::set_config(){
 
         device_write_data_byte(send[0]); //write byte
         device_write_data_byte(send[1]); //write byte
-        device_read_serial_byte(); //read byte
+        device_read_serial_byte(); //read ack
 
         device_write_data_byte(send[2]); //write byte
-        device_read_serial_byte(); //read byte
+        device_read_serial_byte(); //read byte config
 
         device_write_data_byte(send[3]); //write byte
-        device_read_serial_byte(); //read byte
+        device_read_serial_byte(); //read byte data
 
         device_write_data_byte(send[4]); //write byte
         device_write_data_byte(send[5]); //write byte
@@ -297,37 +366,48 @@ void MainWindow::set_config(){
 
         //else
         device_write_data_byte(send[6]); //write byte
-        device_read_serial_byte(); //read byte
-
+        device_read_serial_byte(); //read ack
+**/
 
 }
 void MainWindow::default_config(){
-
-}
-
-char MainWindow::get_config_number(){
-    /**
-    int data_[]={500,600,700,800};
-    int parity_[]={0, 10, 20};
-    int stopbits_[] = {1, 2};
-    // databits[5-8] parity[n-0,odd-1, even 2] stopbits[1-2]
-    return (
-        data_[ui->comboBox_databits->currentIndex()]+
-        parity_[ui->comboBox_parity->currentIndex()]+
-        stopbits_[ui->comboBox_stop_bits->currentIndex()]
+    ui->comboBox_baud_rate->setCurrentIndex(
+        1 //baud rate 9600
     );
 
-    **/
+    ui->comboBox_databits->setCurrentIndex(
+        2 //data 7
+    );
 
-    //how to send them in one byte
-    //[4:3][2:1][0]
-    char data_[] = {0, (1<<3), (1<<4), (1<<3 | 1<<4)};
-    char parity_[] = {0, (1<<1), (1<<2), (1<<1 | 1<<2)};
-    char stopbits_[] = {1, 2};
+    ui->comboBox_parity->setCurrentIndex(
+        0 //parity N
+    );
+
+    ui->comboBox_stop_bits->setCurrentIndex(
+        0 //stopbit 1
+    );
+}
+
+unsigned char MainWindow::get_config_number(){
+    //baud rate [7:5]
+    //{4800, 9600, 14400, 19200, 38400, 57600, 115200};
+    unsigned char baud_rate = (unsigned char) (ui->comboBox_baud_rate->currentIndex());
+    //baud_rate = baud_rate & 0x0F; //to avoid sign bits
+
+    baud_rate = (baud_rate << 5);
+    //configs
+    //baud,data, parity,stop
+    //[7:5][4:3][2:1][0]
+    unsigned char data_[] = {0, (1<<3), (1<<4), (1<<3 | 1<<4)};
+    unsigned char parity_[] = {0, (1<<1), (1<<2), (1<<1 | 1<<2)};
+    unsigned char stopbits_[] = {0, 1};
+
 
     return (
-        data_[ui->comboBox_databits->currentIndex()] |
-        parity_[ui->comboBox_parity->currentIndex()] |
+        baud_rate |
+
+        data_[ui->comboBox_databits->currentIndex()]  |
+        parity_[ui->comboBox_parity->currentIndex()]  |
         stopbits_[ui->comboBox_stop_bits->currentIndex()]
     );
 }

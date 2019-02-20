@@ -135,7 +135,32 @@
         <widget class="QComboBox" name="comboBox_baud_rate">
          <item>
           <property name="text">
+           <string>4800</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
            <string>9600</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>14400</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>19200</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>38400</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>57600</string>
           </property>
          </item>
          <item>
@@ -168,12 +193,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Even Parity</string>
+           <string>Odd Parity</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Odd Parity</string>
+           <string>Even Parity</string>
           </property>
          </item>
         </widget>
@@ -227,6 +252,11 @@
          <item>
           <property name="text">
            <string>7</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>8</string>
           </property>
          </item>
         </widget>

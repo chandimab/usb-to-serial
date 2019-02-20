@@ -72,12 +72,51 @@ unsigned char eeprom_read(unsigned char serial_port){
 
 
 /**  ----------------------------------------------------------------------Software serial implementations------------ **/
+int BAUD_RATE[] = {4800, 9600, 14400, 19200, 38400, 57600, 115200}; //7 (3bits)
+
 void init_soft_serial(){
   for(int i=0; i<8; i++){
     s[i] = new CustomSoftwareSerial(RX[i], TX[i]); // rx, tx
-    s[i]->begin(9600, CSERIAL_8N1);         // Baud rate: 9600, configuration: CSERIAL_8N1
-    //customSerial->write("Test message");            // Write testing data
+    //load settings from eeprom if necessary
+    load_software_serial_settings();
   }
+}
+
+int get_serial_setting(unsigned char conf){
+    //configs
+    //data,parity,stop
+    //{5-8},{0,1,2},{1,2} =>> ex: 501 = 5N1, 721 = 7E1
+    //[4:3][2:1][0]
+    return
+    ((conf & 0b00011000) >> 3)*100 +  //data
+    ((conf & 0b00000110) >> 1)*10 +   //parity
+    (conf & 0b00000001)+1;            //stop
+        
+}
+
+void load_software_serial_settings(){
+  unsigned char setting;
+  for(unsigned char i =0; i<8; i++){
+    setting = eeprom_read(i);
+          //baud   
+    if((setting & 0b11100000)!= 0b11100000){ //0b11100000 is for unconfigured
+        apply_setting_software_serial(
+          i, //serial port
+          BAUD_RATE[(setting & 0b11100000)], //baud_rate
+          get_serial_setting(setting & 0b00011111) //conf
+        );
+    }else{ // no valid saved settings, apply default
+        apply_setting_software_serial(
+          i, //serial port
+          9600, //baud_rate
+          CSERIAL_8N1 //conf
+        );
+    }
+  }
+}
+
+void apply_setting_software_serial(unsigned char serial, int baud_rate, unsigned char conf){
+   s[serial]->begin(baud_rate, conf);         // Baud rate: 9600, configuration: CSERIAL_8N1
 }
 
 void write_s_serial(unsigned char sn, unsigned char data){
@@ -125,10 +164,19 @@ void change_state(){
   if(mode == M_CONF_WRITE){ // configuration write mode
     
     unsigned char data = read_usart(); //read configurations to be written
+
+    //extract baud_rate, conf
+    // baud [7:5] conf[4:0]
+    apply_setting_software_serial(
+          serial, //serial port
+          BAUD_RATE[(data & 0b11100000)], //baud_rate
+          get_serial_setting(data & 0b00011111) //conf
+    );
     
     //change serial port setting, save and setting in the eeprom
-    
     eeprom_write(serial, data); //write to memory
+
+     //applying setting to the serial
 
     write_usart('1'); //ACK
  
