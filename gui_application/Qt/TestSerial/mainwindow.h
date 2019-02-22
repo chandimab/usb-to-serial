@@ -9,7 +9,7 @@
 #include <QPushButton>
 
 
-//communication
+//token flags
 #define M_CONF_WRITE    0b00000001
 #define M_CONF_READ     0b00000010
 #define M_DATA_READ     0b00000100
@@ -54,13 +54,13 @@ class MainWindow : public QMainWindow{
         unsigned char get_config_number();
         char device_read_serial_byte();
 
-        void device_is_ready_for_transmission();
-
         //GUI slots
         void device_rescan(); // identify and connect
         void display_config();
         void set_config();
         void default_config();
+
+        void quit_program();
 
 
     private:
@@ -86,12 +86,6 @@ class MainWindow : public QMainWindow{
 
         //QByteArray send_data;
 
-
-        /** GUI related **/
-//        QPushButton
-//            *btn_set,
-//            *btn_default,
-//            *btn_refresh;
 
 
 

@@ -25,14 +25,14 @@ CustomSoftwareSerial* s[8];
 /** -----------------------------------------------------------------------------Pin Assignments & Mappings ---------------------**/
 int TX[8] = //IC_B
   {
-    2, //TX0 = D2
-    3, //TX1
-    4, //TX2
-    5, //TX3
-    6, //TX4
-    7, //TX5
-    8, //TX6
-    9  //TX7 = D9
+    9, //TX0 = D9
+    8, //TX1
+    7, //TX2
+    6, //TX3
+    5, //TX4
+    4, //TX5
+    3, //TX6
+    2  //TX7 = D7
   };
 
 int RX[8] = //IC_A
@@ -41,10 +41,10 @@ int RX[8] = //IC_A
     11, //RX1
     12, //RX2
     13, //RX3
-    14, //RX4 = A0
-    15, //RX5
-    16, //RX6
-    17 //RX7 = A3
+    A0, //14, //RX4 = A0
+    A1, //15, //RX5
+    A2, //16, //RX6
+    A3 //17 //RX7 = A3
   };
 
 /**  ----------------------------------------------------------------------Buffer ic initializations ----------- **/
@@ -220,15 +220,15 @@ void change_state(){
 
 
   //check serial
-  for(unsigned char i=0; i<8;i++){
-    if(s[i]->available()){
-      
-      write_usart(M_FROM_DEVICE_DATA_SERIAL | (i<<5)); //token
-
-      //todo check this, whether actually gives only byte
-      write_usart(s[i]->read()); //data
-    }
-  }
+//  for(unsigned char i=0; i<8;i++){
+//    if(s[i]->available()){
+//      
+//      write_usart(M_FROM_DEVICE_DATA_SERIAL | (i<<5)); //token
+//
+//      //todo check this, whether actually gives only byte
+//      write_usart(s[i]->read()); //data
+//    }
+//  }
 
 }
 

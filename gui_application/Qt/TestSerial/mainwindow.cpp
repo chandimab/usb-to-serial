@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 //#include <QFile>
-//#include <QFileDialog>
+#include <QFileDialog>
 //#include <QMessageBox>
 //#include <QtSerialPort/QSerialPort>
 //#include <QtSerialPort/QSerialPortInfo>
@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->label_device_status->setStyleSheet("QLabel { color : red; }");
 
     // setting initial values
-    arduino = new QSerialPort(this);
+    arduino = new QSerialPort();
 
     // scan for devices
     device_identify();
@@ -66,6 +66,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
                 SLOT(device_close_connection()) //perform this
     );
 
+    //menu item : [Quit]
+    connect(
+                ui->actionQuit, //menu item reference
+                SIGNAL(triggered()),
+                this,
+                SLOT(quit_program()) //perform this
+    );
+
+    /** GUI related **/
+//        QPushButton
+//            *btn_set,
+//            *btn_default,
+//            *btn_refresh;
+
     //button : [Set]
     connect(
                 ui->pushButton_set,
@@ -91,33 +105,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     );
 
 
-    /**
-        //Button click event test - working
-        connect(
-                    ui->pushButton_refresh,
-                    SIGNAL(released()),
-                    this,
-                    SLOT(refresh_usb())
-        );
-    **/
-
-    /*
-        (object1 :signal1) ----->(slot2: object2)
-        connect(
-            object1,
-            signal1,
-            object2,
-            slot2
-        );
-
-        connect(
-                    ui->actionReload_USB_Interface_List, //menu item reference
-                    SIGNAL(triggered()),
-                    this,
-                    SLOT(refresh_usb())
-        );
-
-    */
 
 }
 
@@ -173,12 +160,12 @@ void MainWindow::device_open_and_configure(){
         arduino->setStopBits(QSerialPort::OneStop);
 
         /** when arduino:SIGNAL(readyRead()) ---> SLOT(device_on_serial_read()):this **/
-        QObject::connect(
-                    arduino,
-                    SIGNAL(readyRead()),
-                    this,
-                    SLOT(device_on_serial_read())
-        );
+//        QObject::connect(
+//                    arduino,
+//                    SIGNAL(readyRead()),
+//                    this,
+//                    SLOT(device_on_serial_read())
+//        );
 
         qDebug() << "Configured successfully.\n";
     }else{
@@ -437,5 +424,12 @@ unsigned char MainWindow::get_config_number(){
         stopbits_[ui->comboBox_stop_bits->currentIndex()]
     );
 }
+
+void MainWindow::quit_program(){
+    device_close_connection();
+    QCoreApplication::quit();
+}
+
+
 
 
