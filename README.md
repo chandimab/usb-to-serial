@@ -8,13 +8,6 @@ The objective behind this project is to build a serial port interfacing device u
 
 - [Report](documentation/Project_Report.pdf)
 
-### Screenshots
-
-![Main GUI](documentation/GUI_SS/1_gui.png "GUI")
-![Main Menu](documentation/GUI_SS/2_menu_main.png "Main Menu")
-![Rescan For Devices](documentation/GUI_SS/3_menu_device_scan.png "Rescan For Devices")
-![Help](documentation/GUI_SS/4_menu_help.png "Help")
-
 ### Work Break Down
 
 The overall workload was broken down into the following major tasks.
@@ -52,3 +45,10 @@ The overall workload was broken down into the following major tasks.
 - Qt Libraries
 - Arduino
 - Autodesk Eagle.
+
+### Screenshots
+
+![Main GUI](documentation/GUI_SS/1_gui.png "GUI")
+![Main Menu](documentation/GUI_SS/2_menu_main.png "Main Menu")
+![Rescan For Devices](documentation/GUI_SS/3_menu_device_scan.png "Rescan For Devices")
+![Help](documentation/GUI_SS/4_menu_help.png "Help")
