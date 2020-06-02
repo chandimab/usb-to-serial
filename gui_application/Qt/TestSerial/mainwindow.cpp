@@ -33,10 +33,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         // open and configure the device, if available
         device_open_and_configure();
 
-        // load/read configurations from the device, and store in a datastructure
-        device_read_config();
+        // load/read configuration and display
+        //device_read_config();
+        display_config(0);
 
-        device_setup = true;
+        //device_setup = true;
 
         // display loaded configurations
         display_config();
@@ -73,6 +74,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
                 this,
                 SLOT(quit_program()) //perform this
     );
+
+//    connect(
+//                ui->actionTest_Serial_7,
+//                SIGNAL(triggered()),
+//                this,
+//                SLOT(test_serial_7())
+//    );
 
     /** GUI related **/
 //        QPushButton
@@ -175,14 +183,14 @@ void MainWindow::device_open_and_configure(){
 }
 
 //returns config for all 8 serial ports
-void MainWindow::device_read_config(){
+//void MainWindow::device_read_config(){
 
-}
+//}
 
-//write config for only the given port
-void MainWindow::device_write_config(int serial_port_id){
+////write config for only the given port
+//void MainWindow::device_write_config(int serial_port_id){
 
-}
+//}
 
 void MainWindow::device_close_connection(){
     if(arduino->isOpen()){
@@ -192,7 +200,7 @@ void MainWindow::device_close_connection(){
 }
 
 //helper functions
-
+/**
 // slot to be executed on serial read
 void MainWindow::device_on_serial_read(){
 
@@ -217,24 +225,24 @@ void MainWindow::device_on_serial_read(){
     }
 
 }
-
+**/
 char MainWindow::device_read_serial_byte(){ //should be a blocking???
     if(arduino->waitForReadyRead(50)){
-        QByteArray r = arduino->read(1);
+        QByteArray r = arduino->read(1); //read 1 byte
         qDebug() << "[serial read:byte]: " << r[0];
-        return r[0];
+        return r[0]; //return first byte
     }else{
         return -1;
     }
 }
 
 
-void MainWindow::device_write_data(QString data){
+//void MainWindow::device_write_data(QString data){
 
-    arduino->write(data.toLatin1());
-    arduino->flush(); //considering time critical things
-    qDebug()<<"[serial write] "<<data.toLatin1();
-}
+//    arduino->write(data.toLatin1());
+//    arduino->flush(); //considering time critical things
+//    qDebug()<<"[serial write] "<<data.toLatin1();
+//}
 
 void MainWindow::device_write_data_byte(char data){
     QByteArray bData; bData.resize(1); //1 byte
@@ -268,9 +276,10 @@ void MainWindow::device_rescan(){
 
 
 }
+
 void MainWindow::display_config(){
 
-    if(arduino_is_available && device_setup){
+    if(arduino_is_available){
         lock = true;
 
         //get selected serial interface
@@ -319,6 +328,59 @@ void MainWindow::display_config(){
     }
 
 }
+
+void MainWindow::display_config(unsigned char serial_selected){
+
+    if(arduino_is_available){
+        lock = true;
+
+        //get selected serial interface
+        //unsigned char serial_selected = (unsigned char)(ui->comboBox_serial_port->currentIndex());
+        //serial_selected = serial_selected & 0x0F; //to avoid sign bits
+        //get config information from the device
+        device_write_data_byte(
+                    M_CONF_READ | //command
+                    (serial_selected << 5) //specifies to which serial
+        );
+
+        //device_read_serial_byte(); //token
+        char conf = device_read_serial_byte(); //read byte
+
+        if(conf == -1){ //error on reading
+            qDebug()<<"errorOnReading";
+        }else if((conf & 0b11100000) == 0b11100000){ //no saved configs, default
+            qDebug()<<"defaultConfig";
+            default_config(); //show default config, for , current serial.
+        }else{
+            //configs
+            //baud,data, parity,stop
+            //[7:5][4:3][2:1][0]
+            qDebug()<<"fromSavedData";
+            ui->comboBox_baud_rate->setCurrentIndex(
+                (conf & 0b11100000) >> 5  //baud rate
+            );
+
+            ui->comboBox_databits->setCurrentIndex(
+                (conf & 0b00011000) >> 3 //data
+            );
+
+            ui->comboBox_parity->setCurrentIndex(
+                (conf & 0b00000110) >> 1 //parity
+            );
+
+            ui->comboBox_stop_bits->setCurrentIndex(
+                (conf & 0b00000001) //stopbit
+            );
+
+        }
+
+
+        lock = false;
+
+    }
+
+}
+
 void MainWindow::set_config(){
 
     //get selected serial interface
@@ -430,6 +492,16 @@ void MainWindow::quit_program(){
     QCoreApplication::quit();
 }
 
+//todo check this
+//void MainWindow::test_serial_7(){
+//    device_write_data_byte(
+//        M_DATA_WRITE | (0<<5)
+//    ); //token
+//    device_write_data_byte(
+//        'A'
+//    ); //token
+//    device_read_serial_byte(); //read ack
+//}
 
 
 

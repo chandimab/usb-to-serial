@@ -44,12 +44,12 @@ class MainWindow : public QMainWindow{
         // main functions
         void device_identify();
         void device_open_and_configure();
-        void device_read_config(); //returns config for all 8 serial ports
-        void device_write_config(int serial_port_id); //write config for only the given port
+        //void device_read_config(); //returns config for all 8 serial ports
+        //void device_write_config(int serial_port_id); //write config for only the given port
         void device_close_connection();
         //helper functions
-        void device_on_serial_read(); // slot to be executed on serial read
-        void device_write_data(QString data);
+        //void device_on_serial_read(); // slot to be executed on serial read
+        //void device_write_data(QString data);
         void device_write_data_byte(char data);
         unsigned char get_config_number();
         char device_read_serial_byte();
@@ -57,10 +57,16 @@ class MainWindow : public QMainWindow{
         //GUI slots
         void device_rescan(); // identify and connect
         void display_config();
+        void display_config(unsigned char serial_selected);
         void set_config();
         void default_config();
 
+
         void quit_program();
+
+
+        //newly added, for testing purpose
+//        void test_serial_7();
 
 
     private:

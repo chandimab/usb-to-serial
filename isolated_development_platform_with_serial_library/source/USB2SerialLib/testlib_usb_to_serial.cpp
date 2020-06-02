@@ -2,6 +2,7 @@
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 
+#include <unistd.h>
 
 TestLib_usb_to_serial::TestLib_usb_to_serial(){
     //arduino = new QSerialPort(this);
@@ -63,6 +64,8 @@ bool TestLib_usb_to_serial::device_open(){
         arduino.setParity(QSerialPort::NoParity);
         arduino.setStopBits(QSerialPort::OneStop);
 
+        usleep(3000000); //delay to configure
+
         return true;
     }else{
 
@@ -99,8 +102,10 @@ void TestLib_usb_to_serial::device_on_serial_read(){
 }
 **/
 
+//TODO write as a blocking function
+
 char TestLib_usb_to_serial::device_read_serial_byte(){ //should be a blocking???
-    if(arduino.waitForReadyRead(50)){
+    if(arduino.waitForReadyRead(100)){
         QByteArray r = arduino.read(1);
         //qDebug() << "[serial read:byte]: " << r[0];
         return r[0];
@@ -117,6 +122,9 @@ char TestLib_usb_to_serial::device_read_serial_byte(){ //should be a blocking???
 //    qDebug()<<"[serial write] "<<data.toLatin1();
 //}
 
+
+
+//todo re write as a blocking function
 void TestLib_usb_to_serial::device_write_data_byte(char data){
     QByteArray bData; bData.resize(1); //1 byte
     bData[0] =  data;
@@ -295,18 +303,27 @@ unsigned char TestLib_usb_to_serial::default_config(){
 
 void TestLib_usb_to_serial::serial_write(unsigned char serial_port, char data){
     lock = true;
+    
+    //usleep(10000);
+
     //token
     device_write_data_byte(
                     M_DATA_WRITE | //command
                     (serial_port << 5) //specifies to which serial
     );
 
+    //usleep(100000); //todo remove these delays, and increase the efficiency using blocking read/write implementation.
+
     //data
     device_write_data_byte(
                     data 
     );
 
+    //usleep(10000); //todo remove these delays, and increase the efficiency using blocking read/write implementation.
+
     device_read_serial_byte(); //ack
+
+    //usleep(10000);
 
     lock = false;
 }
@@ -318,7 +335,7 @@ char TestLib_usb_to_serial::serial_read(unsigned char serial_port){
         //get config information from the device
         device_write_data_byte(
                     M_DATA_READ | //command
-                    (serial_selected << 5) //specifies to which serial
+                    (serial_port << 5) //specifies to which serial
         );
 
         //device_read_serial_byte(); //token

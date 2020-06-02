@@ -4,7 +4,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
+//#include <string>
+#include <unistd.h>
 
 int error(){
     printf("exitting the program.\n");
@@ -28,27 +29,68 @@ int main(){
             //configure serial 0
             // usb_2_serial.set_config(
             //     0, //serial port 0
-            //     9600, // baud rate
-            //     SERIAL_8N1//serial config 8N1
+            //     19200, // baud rate
+            //     SERIAL_7E2//serial config 8E1
             // );
 
             printf("[serial port 0 was configured 9600 Baud, 8N1 ]\n");
 
-            char msg[] = {'h','e','l','l','o','\n'}; //6 chars
+            
+
+            char msg[] = {'A','B','C'}; //6 chars
 
             printf("[serial transmission start.]\n");
             //send characters to serial 0
-            for(int k=0; k<5; k++){
-                for(int i=0; i<6; i++){
+
+                 for(int i=0; i<3; i++){
                     usb_2_serial.serial_write(
                         0, //serial port
                         msg[i] //data
                     );
-                    printf("%c", msg[i]);
-                }
-                 //delay 1000ms
+                 }
 
-            }
+                  
+/**
+                    usb_2_serial.device_write_data_byte(
+                        M_DATA_WRITE | (0<<5)
+                    ); //token
+
+
+                    usleep(100000);
+
+                    usb_2_serial.device_write_data_byte(
+                        msg[i]
+                    ); //token
+
+                    usleep(100000);
+
+                    usb_2_serial.device_read_serial_byte(); //read ack
+
+                    printf("%c", msg[i]);
+                    
+                    usleep(100000);
+**/
+
+//new
+
+                    // usb_2_serial.device_write_data_byte(
+                    //     M_DATA_WRITE | (0<<5)
+                    // ); //token
+                    
+                    // usleep(100000);
+                    
+                    // usb_2_serial.device_write_data_byte(
+                    //     msg[i]
+                    // ); //token
+
+                    // usleep(10000);
+
+                    // usb_2_serial.device_read_serial_byte(); //read ack
+
+                    // usleep(10000);
+
+                 //}
+
 
             printf("[close device connection.]\n");
             //closing device

@@ -363,6 +363,11 @@
     <string>Disconnect</string>
    </property>
   </action>
+  <action name="actionTest_Serial_7">
+   <property name="text">
+    <string>Test Serial 7</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
