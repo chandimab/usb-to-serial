@@ -10,7 +10,7 @@ The objective behind this project is to build a serial port interfacing device u
 
 ### Screenshots
 
-![alt text](https://github.com/chandimab/usb-to-serial/tree/master/documentation/GUI_SS/1_gui.phg "GUI")
+![Main GUI](https://github.com/chandimab/usb-to-serial/tree/master/documentation/GUI_SS/1_gui.png "GUI")
 
 ### Work Break Down
 
