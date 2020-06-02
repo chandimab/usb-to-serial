@@ -6,7 +6,7 @@ The objective behind this project is to build a serial port interfacing device u
 
 ### Documents
 
-- [Report](https://github.com/chandimab/usb-to-serial/documentation/Project_Report.pdf)
+- [Report](https://github.com/chandimab/usb-to-serial/raw/master/documentation/Project_Report.pdf)
 
 ### Work Break Down
 
